@@ -61,6 +61,13 @@ testPostorder =
     then putStrLn "Postorder fine!"
     else putStrLn "postorder failed check"
 
+foldTree :: (a -> b -> b) -> b -> BinaryTree a -> b
+foldTree f y (Leaf) = y
+foldTree f y (Node left x right) = foldr f leftFold [x]
+  where
+    rightFold = foldTree f y right
+    leftFold = foldTree f rightFold left
+
 main :: IO ()
 main = do
   testPreorder
