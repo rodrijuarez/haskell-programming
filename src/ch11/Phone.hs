@@ -1,7 +1,7 @@
 module Phone where
 
 import Data.Char (isUpper, toLower)
-import Data.List (elemIndex, find, maximumBy)
+import Data.List (elemIndex, find, group, maximumBy, sort, sortBy)
 import Data.Ord (comparing)
 
 type Key = (Digit, [Char])
@@ -61,11 +61,17 @@ fingerTaps = foldr ((+) . snd) 0
 mostPopularLetter :: String -> Char
 mostPopularLetter = maximumBy (comparing (fingerTaps . reverseTaps oldPhone))
 
+countWords :: [String] -> [(String, Int)]
+countWords xs = map (\w -> (head w, length w)) $ group $ sort xs
+
 coolestLtr :: [String] -> Char
 coolestLtr = mostPopularLetter . foldr ((:) . mostPopularLetter) ""
 
 coolestWord :: [String] -> String
-coolestWord = undefined
+coolestWord sentences =
+  fst . last . sortBy (comparing snd) $ countWords allWords
+  where
+    allWords = concat . map words $ sentences
 
 oldPhone :: DaPhone
 oldPhone =
