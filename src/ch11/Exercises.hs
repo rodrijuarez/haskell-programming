@@ -11,6 +11,11 @@ isSubsequenceOf sub@(x:xs) (y:ys) =
     else isSubsequenceOf xs ys
 
 capitalizeWords :: String -> [(String, String)]
-capitalizeWords xs = [(x, capitalize x) | x <- words xs]
-  where
-    capitalize (x:xs) = toUpper x : xs
+capitalizeWords xs = [(x, capitalizeWord x) | x <- words xs]
+
+capitalizeWord (x:xs) = toUpper x : xs
+
+capitalizeParagraph :: String -> String
+capitalizeParagraph "" = ""
+capitalizeParagraph ('.':x:xs) = '.' : toUpper x : xs
+capitalizeParagraph (x:xs) = x : capitalizeParagraph xs
