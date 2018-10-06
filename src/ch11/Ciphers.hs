@@ -1,6 +1,7 @@
 module Ciphers where
 
 import Data.Char
+import System.IO
 
 --vigenere :: String -> String -> String
 vigenere phrase keyword = unwords $ map (map (fst . encodeFirst)) wordsWithKeys
@@ -17,3 +18,13 @@ encodeFirst (x, y) = (chr $ ord x + distance, y)
 
 distanceFromTo :: Char -> Char -> Int
 distanceFromTo x y = (ord y) - (ord x)
+
+main :: IO ()
+main = do
+  hSetBuffering stdout NoBuffering
+  putStrLn "Give me your keyword:"
+  keyword <- getLine
+  putStrLn "Give me your phrase:"
+  phrase <- getLine
+  putStrLn $ "Result: " ++ vigenere phrase keyword
+  return ()
