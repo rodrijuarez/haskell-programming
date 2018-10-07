@@ -1,4 +1,4 @@
-module Exercises where
+module WordNumber where
 
 import Data.List (intersperse)
 
