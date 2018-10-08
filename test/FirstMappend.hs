@@ -21,6 +21,10 @@ instance Monoid (First' a) where
   mempty = (First' Nada)
   mappend a b = a <> b
 
+instance Arbitrary a => Arbitrary (First' a) where
+  arbitrary =
+    frequency [(1, return $ First' Nada), (1, fmap (First' . Only) arbitrary)]
+
 firstMappend :: First' a -> First' a -> First' a
 firstMappend = mappend
 
