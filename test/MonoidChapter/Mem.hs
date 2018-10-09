@@ -16,8 +16,8 @@ instance (Semigroup a) => Semigroup (Mem s a) where
     Mem
     { runMem =
         (\x ->
-           ( (fst (runMem a $ x)) <> (fst (runMem b $ x))
-           , (snd (runMem a $ (snd $ runMem b $ x)))))
+           ( (fst . runMem a $ x) <> (fst . runMem b $ x)
+           , (snd . (runMem a) . snd . runMem b $ x)))
     }
 
 instance (Monoid a) => Monoid (Mem s a) where
