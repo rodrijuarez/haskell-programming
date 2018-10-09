@@ -1,6 +1,11 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Trivial where
 
+import Control.Applicative
 import Test.QuickCheck
+import Test.QuickCheck.Gen.Unsafe
+import Test.QuickCheck.Property.Monoid
 
 data Trivial =
   Trivial
@@ -142,6 +147,69 @@ instance Semigroup (Or a b) where
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Or a b) where
   arbitrary = frequency [(1, fmap Fst arbitrary), (1, fmap Snd arbitrary)]
 
+-- Combine
+newtype Combine a b = Combine
+  { unCombine :: (a -> b)
+  }
+
+type CombineAssoc
+   = Combine String String -> Combine String String -> Combine String String -> String -> Bool
+
+instance (Semigroup b) => Semigroup (Combine a b) where
+  a <> b = Combine {unCombine = (\x -> (unCombine a $ x) <> (unCombine b $ x))}
+
+instance (CoArbitrary a, Arbitrary b) => Arbitrary (Combine a b) where
+  arbitrary = do
+    f <- promote (\a -> coarbitrary a arbitrary)
+    return (Combine f)
+
+semigroupAssocForCombine ::
+     Combine String String
+  -> Combine String String
+  -> Combine String String
+  -> String
+  -> Bool
+semigroupAssocForCombine a b c d =
+  (unCombine (a <> (b <> c)) $ d) == (unCombine ((a <> b) <> c) $ d)
+
+instance Show (Combine String String) where
+  show _ = "Combine String String"
+
+-- Comp
+newtype Comp a = Comp
+  { comp :: (a -> a)
+  }
+
+type CompAssoc = Comp String -> Comp String -> Comp String -> Bool
+
+instance (Semigroup a) => Semigroup (Comp a) where
+  a <> b = Comp {comp = (\x -> (comp a $ x) <> (comp b $ x))}
+
+instance (CoArbitrary a) => Arbitrary (Comp a) where
+  arbitrary = do
+    return (Comp (\x -> x))
+
+semigroupAssocComp :: (Eq m, Semigroup m) => m -> m -> m -> Bool
+semigroupAssocComp a b c = (a <> (b <> c)) == ((a <> b) <> c)
+
+-- Comp
+data Validation a b
+  = Failuure a
+  | Succeess b
+  deriving (Eq, Show)
+
+instance Semigroup a => Semigroup (Validation a b) where
+  (Succeess a) <> _ = Succeess a
+  _ <> (Succeess a) = Succeess a
+  (Failuure a) <> _ = Failuure a
+
+type ValidationAssoc
+   = Validation String String -> Validation String String -> Validation String String -> Bool
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Validation a b) where
+  arbitrary =
+    frequency [(1, fmap Failuure arbitrary), (1, fmap Succeess arbitrary)]
+
 main :: IO ()
 main = do
   quickCheck (semigroupAssoc :: TrivialAssoc)
@@ -151,4 +219,5 @@ main = do
   quickCheck (semigroupAssoc :: FourAssoc)
   quickCheck (semigroupAssoc :: BoolConjAssoc)
   quickCheck (semigroupAssoc :: BoolDisjAssoc)
-  quickCheck (semigroupAssoc :: OrAssoc)
+  verboseCheck (semigroupAssocForCombine)
+  quickCheck (semigroupAssoc :: ValidationAssoc)
