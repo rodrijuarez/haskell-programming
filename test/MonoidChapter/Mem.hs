@@ -2,6 +2,7 @@
 
 module MonoidChapter.Mem where
 
+import Control.Applicative
 import Laws.Monoid
 import Laws.Semigroup
 import Test.QuickCheck
@@ -12,13 +13,12 @@ newtype Mem s a = Mem
   }
 
 instance (Semigroup a) => Semigroup (Mem s a) where
-  a <> b =
-    Mem
-    { runMem =
-        (\x ->
-           ( (fst . runMem a $ x) <> (fst . runMem b $ x)
-           , (snd . (runMem a) . snd . runMem b $ x)))
-    }
+  (Mem mem1) <> (Mem mem2) =
+    Mem $ \s ->
+      let (a1, _) = mem1 s
+          (a2, s1) = mem2 s
+          (_, s2) = mem1 s1
+      in (a2 <> a1, s2)
 
 instance (Monoid a) => Monoid (Mem s a) where
   mempty = Mem {runMem = \x -> (mempty, x)}
@@ -49,12 +49,15 @@ instance Show (Mem String String) where
 f' :: Mem Int String
 f' = Mem $ \s -> ("hi", s + 1)
 
+f2' :: Mem Int String
+f2' = Mem $ \s -> ("bye", s + 1)
+
 main :: IO ()
 main = do
   quickCheck (semigroupAssocMem)
   quickCheck (monoidLeftIdentityForMem)
   quickCheck (monoidRightIdentityForMem)
-  print $ runMem (f' <> mempty) 0
+  print $ runMem (f' <> f2') 0
   print $ runMem (mempty <> f') 0
   print $ (runMem mempty 0 :: (String, Int))
   print $ runMem (f' <> mempty) 0 == runMem f' 0
