@@ -1,5 +1,6 @@
 module MonoidChapter.Two where
 
+import Laws.Functor
 import Laws.Monoid
 import Laws.Semigroup
 import Test.QuickCheck
@@ -19,6 +20,9 @@ instance (Monoid a, Monoid b) => Monoid (Two a b) where
   mempty = (Two mempty mempty)
   mappend = (<>)
 
+instance Functor (Two a) where
+  fmap f (Two a b) = Two a (f b)
+
 instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
   arbitrary = do
     x <- arbitrary
@@ -30,3 +34,6 @@ main = do
   quickCheck (semigroupAssoc :: TwoAssoc)
   quickCheck (monoidLeftIdentity :: Two String String -> Bool)
   quickCheck (monoidRightIdentity :: Two String String -> Bool)
+  quickCheck (functorIdentity :: Two String String -> Bool)
+  quickCheck
+    (functorCompose' :: Two Int String -> Fun String String -> Fun String String -> Bool)
