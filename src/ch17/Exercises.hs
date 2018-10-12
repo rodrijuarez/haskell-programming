@@ -39,3 +39,8 @@ y'' = lookup 2 $ zip xs ys
 
 summed :: Maybe Integer
 summed = sum <$> liftA2 (,) x'' y''
+
+-- Fixer Upper
+s = const <$> Just "Hello" <*> Just "World"
+
+o = liftA3 (,,,) (Just 91) (Just 10) (Just "Tierness") <*> Just [1, 2, 3]
