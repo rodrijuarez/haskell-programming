@@ -28,6 +28,11 @@ instance Applicative (List) where
     (f <$> allElems) <> (list <*> allElems)
   _ <*> _ = Nil
 
+instance Monad (List) where
+  return = pure
+  (>>=) (Cons a l) f = (f a) <> (l >>= f)
+  (>>=) (Nil) _ = Nil
+
 instance (Arbitrary a) => Arbitrary (List a) where
   arbitrary =
     frequency
