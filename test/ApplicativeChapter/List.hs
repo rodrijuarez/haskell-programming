@@ -33,6 +33,10 @@ instance Monad (List) where
   (>>=) (Cons a l) f = (f a) <> (l >>= f)
   (>>=) (Nil) _ = Nil
 
+instance Foldable (List) where
+  foldr _ b (Nil) = b
+  foldr f b (Cons a rest) = f a (foldr f b rest)
+
 instance (Arbitrary a) => Arbitrary (List a) where
   arbitrary =
     frequency
@@ -45,6 +49,10 @@ instance (Arbitrary a) => Arbitrary (List a) where
 
 instance Eq a => EqProp (List a) where
   (=-=) = eq
+
+main :: IO ()
+main = do
+  quickBatch $ functor (undefined :: List (Int, String, Int))
 
 newtype ZipList' a =
   ZipList' (List a)
