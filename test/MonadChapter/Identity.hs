@@ -2,7 +2,8 @@ module MonadChapter.Identity where
 
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
-import Test.QuickCheck.Classes (applicative, functor, monad)
+import Test.QuickCheck.Classes
+       (applicative, functor, monad, traversable)
 
 newtype Identity a =
   Identity a
@@ -19,6 +20,12 @@ instance Monad Identity where
   return = pure
   (>>=) (Identity a) f = f a
 
+instance Foldable Identity where
+  foldr f b (Identity a) = f a b
+
+instance Traversable Identity where
+  traverse f (Identity a) = Identity <$> f a
+
 instance (Arbitrary a) => Arbitrary (Identity a) where
   arbitrary = Identity <$> arbitrary
 
@@ -30,3 +37,4 @@ main = do
   quickBatch $ functor (undefined :: Identity (String, Int, String))
   quickBatch $ applicative (undefined :: Identity (String, Int, String))
   quickBatch $ monad (undefined :: Identity (String, Int, String))
+  quickBatch $ traversable (undefined :: Identity (String, Int, String))

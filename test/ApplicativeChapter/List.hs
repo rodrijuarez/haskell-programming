@@ -37,6 +37,10 @@ instance Foldable (List) where
   foldr _ b (Nil) = b
   foldr f b (Cons a rest) = f a (foldr f b rest)
 
+instance Traversable (List) where
+  traverse f (Cons a rest) = Cons <$> f a <*> (traverse f rest)
+  traverse f (Nil) = pure Nil
+
 instance (Arbitrary a) => Arbitrary (List a) where
   arbitrary =
     frequency
