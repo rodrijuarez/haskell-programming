@@ -54,7 +54,8 @@ instance Monad (Reader r) where
   (>>=) (Reader fa) f = Reader (\r -> (runReader (f (fa r)) r))
 
 getDogRM' :: Reader Person Dog
-getDogRM' = Reader (Dog <$> dogName <*> address)
+getDogRM' = do
+  Reader (\r -> Dog (dogName r) (address r))
 
 myLiftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
 myLiftA2 f a b = f <$> a <*> b
