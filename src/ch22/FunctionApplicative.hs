@@ -55,7 +55,11 @@ instance Monad (Reader r) where
 
 getDogRM' :: Reader Person Dog
 getDogRM' = do
-  Reader (\r -> Dog (dogName r) (address r))
+  namie <- Reader dogName
+  doggy <- Reader address
+  return (Dog namie doggy)
+
+getDogRM'' = Reader (Dog <$> dogName <*> address)
 
 myLiftA2 :: Applicative f => (a -> b -> c) -> f a -> f b -> f c
 myLiftA2 f a b = f <$> a <*> b
